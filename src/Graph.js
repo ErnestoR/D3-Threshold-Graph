@@ -118,14 +118,20 @@ class Graph extends Component {
       .attr('y', margin.top)
       .attr('width', meterWidth + 10)
       .attr('height', height)
-      .attr('fill-opacity', .1)
+      .attr('fill-opacity', .03)
       .on('mouseenter', function () {
         hoverItem.classed('hidden', false)
       })
       .on('mousemove', function () {
         let y = d3.mouse(this)[1] - margin.top;
 
-        hoverItem.attr('transform', `translate(0, ${y})`)
+        hoverItem.attr('transform', `translate(0, ${y})`);
+
+        let yValue = yScale.invert(y);
+        let int = d3.format('d');
+
+        hoverItem.select('.meter-text')
+          .text(`${int(yValue)}%`)
       })
       .on('mouseleave', function () {
         hoverItem.classed('hidden', true)
@@ -133,7 +139,12 @@ class Graph extends Component {
       .on('click',  function() {
         let y = d3.mouse(this)[1] - margin.top;
 
-        selection.call(addNewThreshold, false, y);
+        let yValue = d3.format('d')(yScale.invert(y));
+
+        hoverItem.select('.meter-text')
+          .text(`${yValue} %`)
+
+        selection.call(addNewThreshold, false, y, yValue);
       });
   }
 
@@ -150,10 +161,12 @@ class Graph extends Component {
       return;
     }
 
-    console.log('drag', y);
+    let yValue = d3.format('d')(y);
 
     d3.select(this)
       .attr('transform', `translate(0, ${d3.event.y - 5})`)
+      .select('.meter-text')
+        .text(`${yValue}%`);
   }
 
   dragEnd() {
@@ -162,16 +175,15 @@ class Graph extends Component {
       .classed('active', false);
   }
 
-  addNewThreshold(selection, isHover, yPosition) {
+  addNewThreshold(selection, isHover, yPosition, yValue) {
     let newColor = '#'+((1<<24)*Math.random()|0).toString(16);
     let blueHover = '#1086E8';
 
     const container = selection.append('g');
 
-    // container.append('text')
-    //   .attr("x", -25)
-    //   .attr("y", 17)
-    //   .text(yPosition);
+    const text = container.append('text')
+      .attr('class', 'meter-text')
+      .attr("y", 15);
 
     container.append('polygon')
         .attr("points", "8 0 30 0 30 12 8 12 0 6")
@@ -197,6 +209,8 @@ class Graph extends Component {
       .attr("stroke-dasharray", "5, 5");
 
     if (yPosition) {
+      text.text(`${yValue}%`);
+
       container
         .attr('transform', `translate(0, ${yPosition + 5})`)
         .call(d3.drag()
