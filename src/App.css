@@ -1,0 +1,57 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  animation: App-logo-spin infinite 20s linear;
+  height: 80px;
+}
+
+.App-header {
+  background-color: #222;
+  height: 150px;
+  padding: 20px;
+  color: white;
+}
+
+.App-title {
+  font-size: 1.5em;
+}
+
+.App-intro {
+  font-size: large;
+}
+
+@keyframes App-logo-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+svg {
+  margin-top: 10px;
+  border: solid black 1px;
+}
+
+
+.threshold-line.active {
+  stroke: red;
+}
+.threshold-hover-mark.hidden{
+  display: none;
+}
+
+.threshold-hover-mark:hover polygon, .threshold-hover-mark:hover line{
+  fill: red;
+  stroke: black;
+  cursor: -webkit-grab; /* Chrome 1-21, Safari 4+ */
+  cursor:    -moz-grab; /* Firefox 1.5-26 */
+  cursor:         grab;
+}
+
+.threshold-hover-mark.active polygon, .threshold-hover-mark.active line{
+  fill: red !important;
+  stroke: black !important;
+  cursor: -webkit-grabbing !important;
+  cursor:    -moz-grabbing !important;
+  cursor:         grabbing !important;
+}
