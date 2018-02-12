@@ -12,6 +12,7 @@ const blue = `#1086E8`;
 const lightBlue = `#C9E1F9`;
 const grey = '#C1C1C1';
 const gridLine = '#F6F7FB';
+const tickColors = [lightBlue, gridLine];
 
 const meterWidth = 10;
 const tickValues = [0,25,50,75,100];
@@ -141,7 +142,7 @@ class Graph extends Component {
       .attr("stroke", `${isHover ? blueHover : newColor }`)
       .attr("stroke-linejoin", "round")
       .attr("stroke-linecap", "round")
-      .attr("stroke-width", 2)
+      .attr("stroke-width", 1)
       .attr("stroke-dasharray", "5, 5");
 
     if (yPosition) {
@@ -169,8 +170,8 @@ class Graph extends Component {
       .attr('height', height)
       .attr('width', meterWidth)
       .attr('fill', blue)
-      .attr("rx", 5)
-      .attr("ry", 5);
+      .attr("rx", 4)
+      .attr("ry", 4);
 
     //Meter hover area
     meterContainer
