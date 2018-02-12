@@ -33,7 +33,7 @@ class Graph extends Component {
           }))
         };
       })
-    }
+    };
 
     this.addNewThreshold = this.addNewThreshold.bind(this);
   }
@@ -78,9 +78,9 @@ class Graph extends Component {
     svg.call(this.drawThresholdMeter, this.addNewThreshold);
 
 
-    var line = d3.line()
+    const line = d3.line()
       .x(d => xScale(d.date))
-      .y(d => yScale(d.health))
+      .y(d => yScale(d.health));
 
     chartArea
       .selectAll('.line')
@@ -122,10 +122,10 @@ class Graph extends Component {
       .on('mouseenter', function () {
         hoverItem.classed('hidden', false)
       })
-      .on('mousemove', function (d) {
+      .on('mousemove', function () {
         let y = d3.mouse(this)[1] - margin.top;
 
-        hoverItem.attr('transform', `translate(0, ${y })`)
+        hoverItem.attr('transform', `translate(0, ${y})`)
       })
       .on('mouseleave', function () {
         hoverItem.classed('hidden', true)
@@ -166,8 +166,7 @@ class Graph extends Component {
     let newColor = '#'+((1<<24)*Math.random()|0).toString(16);
     let blueHover = '#1086E8';
 
-    const container = selection.append('g')
-
+    const container = selection.append('g');
 
     // container.append('text')
     //   .attr("x", -25)
