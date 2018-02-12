@@ -10,6 +10,7 @@ const meterWidth = 10;
 
 const blue = `#1086E8`;
 const lightBlue = `#C9E1F9`;
+const grey = '#C1C1C1';
 
 
 let yScale = d3.scaleLinear()
@@ -71,28 +72,51 @@ class Graph extends Component {
         .tickFormat((d) => `${d}%`)
       );
 
-    // threshold meter
-    svg
-      .append('g')
-      .attr('class', 'meter')
-      .attr('transform', `translate(50, ${margin.top})`)
-        .append('rect')
-        .attr('height', height)
-        .attr('width', meterWidth)
-        .attr('fill', 'blue');
-
-    const addNewThreshold = this.addNewThreshold;
-
     svg.call(this.addNewThreshold, true);
-    
-    let hoverItem = svg.select('.threshold-hover-mark');
 
-    svg
+    // threshold meter container
+    svg.call(this.drawThresholdMeter, this.addNewThreshold);
+
+
+    var line = d3.line()
+      .x(d => xScale(d.date))
+      .y(d => yScale(d.health))
+
+    chartArea
+      .selectAll('.line')
+      .data(data)
+      .enter()
+        .append('path')
+        .attr('class', 'line')
+        .attr('d', d => line(d.values))
+        .style('stroke', (d, i) => ['#1086E8', '#63BD5A', '#7A5DA3'][i])
+        .style('stroke-width', 2)
+        .style('fill', 'none');
+
+    //this.addNewthreshold(chartArea)
+  }
+
+  drawThresholdMeter(selection, addNewThreshold) {
+    const meterContainer = selection.append('g');
+    const hoverItem = selection.select('.threshold-hover-mark');
+
+    //Meter bar
+    meterContainer
+      .append('rect')
+      .attr('class', 'meter')
+      .attr('x', margin.left / 3)
+      .attr('y', margin.top)
+      .attr('height', height)
+      .attr('width', meterWidth)
+      .attr('fill', blue);
+
+    //Meter hover area
+    meterContainer
       .append('rect')
       .attr('class', 'threshold-hover')
-      .attr('x', 20)
+      .attr('x', margin.left / 3 - 5)
       .attr('y', margin.top)
-      .attr('width', 25)
+      .attr('width', meterWidth + 10)
       .attr('height', height)
       .attr('fill-opacity', .1)
       .on('mouseenter', function () {
@@ -109,25 +133,8 @@ class Graph extends Component {
       .on('click',  function() {
         let y = d3.mouse(this)[1] - margin.top;
 
-        svg.call(addNewThreshold, false, y);
+        selection.call(addNewThreshold, false, y);
       });
-
-    var line = d3.line()
-    .x(d => xScale(d.date))
-    .y(d => yScale(d.health))
-
-    chartArea
-      .selectAll('.line')
-      .data(data)
-      .enter()
-      .append('path')
-      .attr('class', 'line')
-      .attr('d', d => line(d.values))
-      .style('stroke', (d, i) => ['#1086E8', '#63BD5A', '#7A5DA3'][i])
-      .style('stroke-width', 2)
-      .style('fill', 'none');
-
-    //this.addNewthreshold(chartArea)
   }
 
   dragStart() {
@@ -160,21 +167,21 @@ class Graph extends Component {
     let blueHover = '#1086E8';
 
     const container = selection.append('g')
-      .attr('class', 'threshold-hover-mark');
 
 
-    container.append('text')
-      .attr("x", -20)
-      .attr("y", 17)
-      .text(yPosition);
+    // container.append('text')
+    //   .attr("x", -25)
+    //   .attr("y", 17)
+    //   .text(yPosition);
 
     container.append('polygon')
         .attr("points", "8 0 30 0 30 12 8 12 0 6")
         .attr("fill", `${isHover ? blueHover : newColor }`)
-        .attr('transform', `translate(40, 5)`);
+        .attr('transform', `translate(46.5, 4.5)`);
 
     if (isHover) {
       container
+        .attr('class', 'threshold-hover-mark')
         .classed('hidden', true);
     }
 
@@ -209,6 +216,5 @@ class Graph extends Component {
     )
   }
 }
-
 
 export default Graph;
