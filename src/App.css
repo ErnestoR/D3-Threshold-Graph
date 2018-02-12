@@ -36,8 +36,18 @@ svg text{
   fill: #C1C1C1;
 }
 
+path.domain {
+  display: none;
+}
+
+
+
 path.domain, g.tick line {
-  stroke: #C1C1C1;
+  stroke: #F6F7FB;
+}
+
+.grid .tick line {
+  stroke: #F6F7FB;
 }
 
 .meter-text {

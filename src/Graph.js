@@ -6,14 +6,17 @@ const fullWidth = 565;
 const fullHeight = 400;
 const width = fullWidth - margin.left - margin.right;
 const height = fullHeight - margin.top - margin.bottom;
-const meterWidth = 10;
+
 
 const blue = `#1086E8`;
 const lightBlue = `#C9E1F9`;
 const grey = '#C1C1C1';
+const gridLine = '#F6F7FB';
 
+const meterWidth = 10;
+const tickValues = [0,25,50,75,100];
 
-let yScale = d3.scaleLinear()
+const yScale = d3.scaleLinear()
   .domain([0,100])
   .range([height, 0]);
 
@@ -46,29 +49,28 @@ class Graph extends Component {
         .attr('width', width + margin.left + margin.right)
         .attr('height', height + margin.top + margin.bottom);
 
+    svg.call(this.drawGridLines, this);
+
     const chartArea = svg.append('g')
         .attr('transform', `translate(${margin.left}, ${margin.top})`);
 
-    let xScale = d3.scaleTime()
+    const xScale = d3.scaleTime()
       .domain([
         d3.min(data, device => d3.min(device.values, d => d.date)),
         d3.max(data, device => d3.max(device.values, d => d.date))
       ])
       .range([0, width]);
 
+    // Add xAxis
     chartArea
       .append('g')
         .attr('transform', `translate(0, ${height})`)
-      .call(d3.axisBottom(xScale).ticks(7));
+        .call(d3.axisBottom(xScale).ticks(7));
 
-    let yScale = d3.scaleLinear()
-      .domain([0,100])
-      .range([height, 0]);
-
+    // Add yAxis
     chartArea
       .append('g')
-      .call(d3.axisLeft(yScale)
-        .tickValues([0,25,50,75,100])
+      .call(this.createYAxis()
         .tickFormat((d) => `${d}%`)
       );
 
@@ -92,8 +94,66 @@ class Graph extends Component {
         .style('stroke', (d, i) => ['#1086E8', '#63BD5A', '#7A5DA3'][i])
         .style('stroke-width', 2)
         .style('fill', 'none');
+  }
 
-    //this.addNewthreshold(chartArea)
+  createYAxis() {
+    return d3.axisLeft(yScale)
+      .tickValues(tickValues)
+  }
+
+  drawGridLines(selection, cmp) {
+    selection.append('g')
+      .attr('class', 'grid')
+      .attr('transform', `translate(${margin.left}, ${margin.top})`)
+      .call(cmp.createYAxis()
+        .tickSize(-width)
+        .tickFormat('')
+      );
+  }
+
+  addNewThreshold(selection, isHover, yPosition, yValue) {
+    let newColor = '#'+((1<<24)*Math.random()|0).toString(16);
+    let blueHover = '#1086E8';
+
+    const container = selection.append('g');
+
+    const text = container.append('text')
+      .attr('class', 'meter-text')
+      .attr("y", 15);
+
+    container.append('polygon')
+      .attr("points", "8 0 30 0 30 12 8 12 0 6")
+      .attr("fill", `${isHover ? blueHover : newColor }`)
+      .attr('transform', `translate(46.5, 4.5)`);
+
+    if (isHover) {
+      container
+        .attr('class', 'threshold-hover-mark')
+        .classed('hidden', true);
+    }
+
+    container.append("line")
+      .attr('class', 'threshold-line')
+      .attr("x1", margin.left + 2)
+      .attr("x2", fullWidth)
+      .attr("y1", 11)
+      .attr("y2", 11)
+      .attr("stroke", `${isHover ? blueHover : newColor }`)
+      .attr("stroke-linejoin", "round")
+      .attr("stroke-linecap", "round")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "5, 5");
+
+    if (yPosition) {
+      text.text(`${yValue}%`);
+
+      container
+        .attr('transform', `translate(0, ${yPosition + 5})`)
+        .call(d3.drag()
+          .on("start", this.dragStart)
+          .on("drag", this.drag)
+          .on("end", this.dragEnd));
+    }
   }
 
   drawThresholdMeter(selection, addNewThreshold) {
@@ -175,51 +235,6 @@ class Graph extends Component {
     console.log('drag end');
     d3.select(this)
       .classed('active', false);
-  }
-
-  addNewThreshold(selection, isHover, yPosition, yValue) {
-    let newColor = '#'+((1<<24)*Math.random()|0).toString(16);
-    let blueHover = '#1086E8';
-
-    const container = selection.append('g');
-
-    const text = container.append('text')
-      .attr('class', 'meter-text')
-      .attr("y", 15);
-
-    container.append('polygon')
-        .attr("points", "8 0 30 0 30 12 8 12 0 6")
-        .attr("fill", `${isHover ? blueHover : newColor }`)
-        .attr('transform', `translate(46.5, 4.5)`);
-
-    if (isHover) {
-      container
-        .attr('class', 'threshold-hover-mark')
-        .classed('hidden', true);
-    }
-
-    container.append("line")
-      .attr('class', 'threshold-line')
-      .attr("x1", margin.left + 2)
-      .attr("x2", fullWidth)
-      .attr("y1", 11)
-      .attr("y2", 11)
-      .attr("stroke", `${isHover ? blueHover : newColor }`)
-      .attr("stroke-linejoin", "round")
-      .attr("stroke-linecap", "round")
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "5, 5");
-
-    if (yPosition) {
-      text.text(`${yValue}%`);
-
-      container
-        .attr('transform', `translate(0, ${yPosition + 5})`)
-        .call(d3.drag()
-          .on("start", this.dragStart)
-          .on("drag", this.drag)
-          .on("end", this.dragEnd));
-    }
   }
 
   render() {
