@@ -108,7 +108,9 @@ class Graph extends Component {
       .attr('y', margin.top)
       .attr('height', height)
       .attr('width', meterWidth)
-      .attr('fill', blue);
+      .attr('fill', blue)
+      .attr("rx", 5)
+      .attr("ry", 5);
 
     //Meter hover area
     meterContainer

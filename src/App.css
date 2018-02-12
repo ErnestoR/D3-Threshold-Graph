@@ -29,9 +29,22 @@
 
 svg {
   margin-top: 10px;
-  border: solid black 1px;
 }
 
+svg text{
+  font-family: Lato;
+  fill: #C1C1C1;
+}
+
+path.domain, g.tick line {
+  stroke: #C1C1C1;
+}
+
+.meter-text {
+  font-size: 0.75em;
+  fill: #C1C1C1;
+  margin-left: 5px;
+}
 
 .threshold-line.active {
   stroke: red;
