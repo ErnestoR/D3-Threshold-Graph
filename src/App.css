@@ -56,24 +56,17 @@ path.domain, g.tick line {
   margin-left: 5px;
 }
 
-.threshold-line.active {
-  stroke: red;
-}
 .threshold-hover-mark.hidden{
   display: none;
 }
 
-.threshold-hover-mark:hover polygon, .threshold-hover-mark:hover line{
-  fill: red;
-  stroke: black;
+.x-threshold:hover {
   cursor: -webkit-grab; /* Chrome 1-21, Safari 4+ */
   cursor:    -moz-grab; /* Firefox 1.5-26 */
   cursor:         grab;
 }
 
-.threshold-hover-mark.active polygon, .threshold-hover-mark.active line{
-  fill: red !important;
-  stroke: black !important;
+.x-threshold.active polygon, .threshold-hover-mark.active line{
   cursor: -webkit-grabbing !important;
   cursor:    -moz-grabbing !important;
   cursor:         grabbing !important;
