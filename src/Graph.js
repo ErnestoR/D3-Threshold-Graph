@@ -18,6 +18,7 @@ const lineColors = ['#1086E8', '#63BD5A', '#7A5DA3'];
 
 const meterWidth = 10;
 const tickValues = [0,25,50,75,100];
+let index = 1;
 
 const yScale = d3.scaleLinear()
   .domain([0,100])
@@ -29,6 +30,12 @@ class Graph extends Component {
 
     const parseTime = d3.timeParse('%d/%m/%Y');
 
+    // threshold = {
+    //   index: 1,
+    //   value: 50,
+    //   type: [1,2,3]
+    // };
+
     this.state = {
       data: props.data.map(d => {
         return {
@@ -38,7 +45,8 @@ class Graph extends Component {
             date: parseTime(item.date)
           }))
         };
-      })
+      }),
+      thresholds: []
     };
 
     this.addNewThreshold = this.addNewThreshold.bind(this);
@@ -122,11 +130,22 @@ class Graph extends Component {
       );
   }
 
+  /**
+   * Adds new threshold container (text, icon, line) and threshold meter bar
+   *
+   * @param selection - D3 selection
+   * @param isHover - If true will add necessary attr for hover threshold
+   * @param yPosition - Position to add threshold
+   * @param yValue - value for text
+   */
   addNewThreshold(selection, isHover, yPosition, yValue) {
     let blueHover = blue;
 
     const container = selection.append('g')
-      .attr('class', 'x-threshold');
+      .attrs({
+        'class': 'x-threshold' ,
+        'data-index': index,
+      });
 
     // label
     const text = container.append('text')
@@ -168,8 +187,21 @@ class Graph extends Component {
     if (yPosition) {
       text.text(`${yValue}%`);
 
+      console.log(
+        d3.select('.x-meter')
+          .append('rect')
+          .attrs({
+            'y': margin.top + yPosition,
+            'x': margin.left / 3,
+            'data-index': index,
+            height: height - yPosition,
+            width: meterWidth,
+            fill: lightBlue,
+          })
+      );
+
       container
-        .attr('transform', `translate(0, ${yPosition + 5})`)
+        .attr('transform', `translate(0, ${yPosition})`)
         .call(d3.drag()
           .on("start", this.dragStart)
           .on("drag", this.drag)
@@ -179,11 +211,15 @@ class Graph extends Component {
             .select('.meter-rect')
             .attr('fill', 'red')
         });
+
+      index++;
     }
   }
 
   drawThresholdMeter(selection, addNewThreshold) {
-    const meterContainer = selection.append('g');
+    const meterContainer = selection.append('g')
+      .attr('class', 'x-meter');
+
     const hoverItem = selection.select('.threshold-hover-mark');
 
     //Meter bar
@@ -246,18 +282,27 @@ class Graph extends Component {
   }
 
   drag() {
-    let y = yScale.invert(d3.event.y - 5);
+    const currentIndex = this.getAttribute('data-index');
+    const y = yScale.invert(d3.event.y - 5);
+    const yValue = d3.format('d')(y);
+    const yPosition = d3.event.y - 5;
 
     if (0 > y || y > 100 ) {
       return;
     }
 
-    let yValue = d3.format('d')(y);
-
+    // Transform threshold container
     d3.select(this)
-      .attr('transform', `translate(0, ${d3.event.y - 5})`)
+      .attr('transform', `translate(0, ${yPosition})`)
       .select('.meter-text')
         .text(`${yValue}%`);
+
+    // Transform threshold meter
+    d3.select(`.x-meter rect[data-index="${currentIndex}"]`)
+      .attrs({
+        'y': margin.top + yPosition,
+        height: height - yPosition,
+      })
   }
 
   dragEnd() {
