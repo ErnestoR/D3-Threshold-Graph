@@ -24,6 +24,8 @@ const yScale = d3.scaleLinear()
   .domain([0,100])
   .range([height, 0]);
 
+const thresholds = {};
+
 class Graph extends Component {
   constructor(props) {
     super(props);
@@ -46,7 +48,6 @@ class Graph extends Component {
           }))
         };
       }),
-      thresholds: []
     };
 
     this.addNewThreshold = this.addNewThreshold.bind(this);
@@ -139,6 +140,7 @@ class Graph extends Component {
    * @param yValue - value for text
    */
   addNewThreshold(selection, isHover, yPosition, yValue) {
+    const me = this;
     let blueHover = blue;
 
     const container = selection.append('g')
@@ -191,6 +193,7 @@ class Graph extends Component {
         d3.select('.x-meter')
           .append('rect')
           .attrs({
+            'class': 'meter-bar',
             'y': margin.top + yPosition,
             'x': margin.left / 3,
             'data-index': index,
@@ -205,12 +208,13 @@ class Graph extends Component {
         .call(d3.drag()
           .on("start", this.dragStart)
           .on("drag", this.drag)
-          .on("end", this.dragEnd))
-        .on('click',  function() {
-          d3.select(this)
-            .select('.meter-rect')
-            .attr('fill', 'red')
-        });
+          .on("end", this.dragEnd));
+
+      thresholds[index] = {
+        index,
+        position: margin.top + yPosition,
+        value: yValue,
+      };
 
       index++;
     }
@@ -282,7 +286,7 @@ class Graph extends Component {
   }
 
   drag() {
-    const currentIndex = this.getAttribute('data-index');
+    const currentIndex = Number(this.getAttribute('data-index'));
     const y = yScale.invert(d3.event.y - 5);
     const yValue = d3.format('d')(y);
     const yPosition = d3.event.y - 5;
@@ -302,12 +306,22 @@ class Graph extends Component {
       .attrs({
         'y': margin.top + yPosition,
         height: height - yPosition,
-      })
+      });
+
+    thresholds[currentIndex] = {
+      ...thresholds[currentIndex],
+      position : margin.top + yPosition,
+      value : Number(yValue)
+    };
+
+    d3.select()
   }
 
   dragEnd() {
     d3.select(this)
       .classed('active', false);
+
+    console.log(thresholds)
   }
 
   render() {
