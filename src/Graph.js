@@ -189,19 +189,17 @@ class Graph extends Component {
     if (yPosition) {
       text.text(`${yValue}%`);
 
-      console.log(
-        d3.select('.x-meter')
-          .append('rect')
-          .attrs({
-            'class': 'meter-bar',
-            'y': margin.top + yPosition,
-            'x': margin.left / 3,
-            'data-index': index,
-            height: height - yPosition,
-            width: meterWidth,
-            fill: lightBlue,
-          })
-      );
+      d3.select('.x-meter')
+        .append('rect')
+        .attrs({
+          'class': 'meter-bar',
+          'y': margin.top + yPosition,
+          'x': margin.left / 3,
+          'data-index': index,
+          'height': height - yPosition,
+          'width': meterWidth,
+          'fill': lightBlue,
+        });
 
       container
         .attr('transform', `translate(0, ${yPosition})`)
@@ -314,7 +312,6 @@ class Graph extends Component {
       value : Number(yValue)
     };
 
-    d3.select()
   }
 
   dragEnd() {
