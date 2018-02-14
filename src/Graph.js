@@ -24,7 +24,12 @@ const yScale = d3.scaleLinear()
   .domain([0,100])
   .range([height, 0]);
 
-const thresholds = {};
+const thresholds = [
+  {
+    id: 1,
+    value: 50
+  }
+];
 
 class Graph extends Component {
   constructor(props) {
@@ -48,6 +53,7 @@ class Graph extends Component {
           }))
         };
       }),
+      thresholds,
     };
 
     this.addNewThreshold = this.addNewThreshold.bind(this);
@@ -93,7 +99,65 @@ class Graph extends Component {
     // threshold meter container
     svg.call(this.drawThresholdMeter, this.addNewThreshold);
 
+    //Meter hover area
+    const hoverItem = svg.select('.threshold-hover-mark');
 
+    const addThreshold = this.addNewThreshold;
+    svg.append('rect')
+      .attrs({
+        'class': 'threshold-hover',
+        'x': margin.left / 3 - 5,
+        'y': margin.top,
+        'height': height,
+        'width': meterWidth + 10,
+        'fill-opacity': .03,
+      })
+      .on('mouseenter', function () {
+        hoverItem.classed('hidden', false)
+      })
+      .on('mousemove', function () {
+        let y = d3.mouse(this)[1] - margin.top;
+
+        hoverItem.attr('transform', `translate(0, ${y})`);
+
+        let yValue = yScale.invert(y);
+        let int = d3.format('d');
+
+        hoverItem.select('.meter-text')
+          .text(`${int(yValue)}%`)
+      })
+      .on('mouseleave', function () {
+        hoverItem.classed('hidden', true)
+      })
+      .on('click',  function() {
+        let y = d3.mouse(this)[1] - margin.top;
+
+        let yValue = d3.format('d')(yScale.invert(y));
+
+        hoverItem.select('.meter-text')
+          .text(`${yValue} %`);
+
+        d3.select('.x-meter')
+          .call(addThreshold, false, y, yValue);
+      });
+
+    svg.select('.x-meter')
+      .call(this.generateThresholds);
+
+
+    setTimeout( () => {
+      console.log('lol')
+
+      thresholds.push({
+        id: 2,
+        value : 75,
+      })
+
+      svg.select('.x-meter')
+        .call(this.generateThresholds);
+    }, 2000)
+
+    // Line Graph
     const line = d3.line()
       .x(d => xScale(d.date))
       .y(d => yScale(d.health));
@@ -222,8 +286,6 @@ class Graph extends Component {
     const meterContainer = selection.append('g')
       .attr('class', 'x-meter');
 
-    const hoverItem = selection.select('.threshold-hover-mark');
-
     //Meter bar
     meterContainer
       .append('rect')
@@ -237,44 +299,24 @@ class Graph extends Component {
         'rx': 4,
         'ry': 4,
       });
+  }
 
-    //Meter hover area
-    meterContainer
+  generateThresholds(selection) {
+    const container = selection.selectAll('.meter-bar')
+      .data(thresholds);
+
+    container.exit()
+      .remove();
+
+    container.enter()
       .append('rect')
       .attrs({
-        'class': 'threshold-hover',
-        'x': margin.left / 3 - 5,
-        'y': margin.top,
-        'height': height,
-        'width': meterWidth + 10,
-        'fill-opacity': .03,
-      })
-      .on('mouseenter', function () {
-        hoverItem.classed('hidden', false)
-      })
-      .on('mousemove', function () {
-        let y = d3.mouse(this)[1] - margin.top;
-
-        hoverItem.attr('transform', `translate(0, ${y})`);
-
-        let yValue = yScale.invert(y);
-        let int = d3.format('d');
-
-        hoverItem.select('.meter-text')
-          .text(`${int(yValue)}%`)
-      })
-      .on('mouseleave', function () {
-        hoverItem.classed('hidden', true)
-      })
-      .on('click',  function() {
-        let y = d3.mouse(this)[1] - margin.top;
-
-        let yValue = d3.format('d')(yScale.invert(y));
-
-        hoverItem.select('.meter-text')
-          .text(`${yValue} %`);
-
-        selection.call(addNewThreshold, false, y, yValue);
+        'class': 'meter-bar',
+        'x': margin.left / 3,
+        'y': (d) => yScale(d.value) + margin.top,
+        'height': (d) => yScale(d.value),
+        'width': meterWidth,
+        'fill': lightBlue,
       });
   }
 
