@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import * as d3 from 'd3';
 import "d3-selection-multi";
+import './Graph.css'
 
 const margin = { top: 10, right: 20, bottom: 30, left: 110 };
 const fullWidth = 565;
@@ -72,7 +73,10 @@ class Graph extends Component {
     svg.call(this.drawGridLines, this);
 
     const chartArea = svg.append('g')
-        .attr('transform', `translate(${margin.left}, ${margin.top})`);
+        .attrs({
+          'class': 'line-chart',
+          'transform': `translate(${margin.left}, ${margin.top})`
+        });
 
     const xScale = d3.scaleTime()
       .domain([
@@ -100,12 +104,12 @@ class Graph extends Component {
     svg.call(this.drawThresholdMeter, this.addNewThreshold);
 
     //Meter hover area
-    const hoverItem = svg.select('.threshold-hover-mark');
+    const hoverItem = svg.select('.threshold--hover');
 
     const addThreshold = this.addNewThreshold;
     svg.append('rect')
       .attrs({
-        'class': 'threshold-hover',
+        'class': 'meter__hover',
         'x': margin.left / 3 - 5,
         'y': margin.top,
         'height': height,
@@ -123,7 +127,7 @@ class Graph extends Component {
         let yValue = yScale.invert(y);
         let int = d3.format('d');
 
-        hoverItem.select('.meter-text')
+        hoverItem.select('.threshold__text')
           .text(`${int(yValue)}%`)
       })
       .on('mouseleave', function () {
@@ -134,14 +138,14 @@ class Graph extends Component {
 
         let yValue = d3.format('d')(yScale.invert(y));
 
-        hoverItem.select('.meter-text')
+        hoverItem.select('.threshold__text')
           .text(`${yValue} %`);
 
-        d3.select('.x-meter')
+        d3.select('.meter')
           .call(addThreshold, false, y, yValue);
       });
 
-    svg.select('.x-meter')
+    svg.select('.meter')
       .call(this.generateThresholds);
 
 
@@ -153,7 +157,7 @@ class Graph extends Component {
         value : 75,
       })
 
-      svg.select('.x-meter')
+      svg.select('.meter')
         .call(this.generateThresholds);
     }, 2000)
 
@@ -186,7 +190,7 @@ class Graph extends Component {
   drawGridLines(selection, cmp) {
     selection.append('g')
       .attrs({
-        'class': 'grid',
+        'class': 'grid-lines',
         'transform': `translate(${margin.left}, ${margin.top})`
       })
       .call(cmp.createYAxis()
@@ -209,21 +213,21 @@ class Graph extends Component {
 
     const container = selection.append('g')
       .attrs({
-        'class': 'x-threshold' ,
+        'class': 'threshold' ,
         'data-index': index,
       });
 
     // label
     const text = container.append('text')
       .attrs({
-        'class': 'meter-text',
+        'class': 'threshold__text',
         "y": 15,
       });
 
     // icon
     container.append('polygon')
       .attrs({
-        'class': 'meter-icon',
+        'class': 'threshold__icon',
         'points': '8 0 30 0 30 12 8 12 0 6',
         'transform': `translate(46.5, 4.5)`,
         'fill': `${isHover ? blueHover : lightBlue }`,
@@ -232,7 +236,7 @@ class Graph extends Component {
     // line
     container.append("line")
       .attrs({
-        'class': 'meter-line',
+        'class': 'threshold__line',
         'x1': margin.left + 2,
         'x2': fullWidth,
         'y1': 11,
@@ -246,17 +250,17 @@ class Graph extends Component {
 
     if (isHover) {
       container
-        .attr('class', 'threshold-hover-mark')
+        .attr('class', 'threshold threshold--hover')
         .classed('hidden', true);
     }
 
     if (yPosition) {
       text.text(`${yValue}%`);
 
-      d3.select('.x-meter')
+      d3.select('.meter')
         .append('rect')
         .attrs({
-          'class': 'meter-bar',
+          'class': 'threshold__bar',
           'y': margin.top + yPosition,
           'x': margin.left / 3,
           'data-index': index,
@@ -284,7 +288,7 @@ class Graph extends Component {
 
   drawThresholdMeter(selection, addNewThreshold) {
     const meterContainer = selection.append('g')
-      .attr('class', 'x-meter');
+      .attr('class', 'meter');
 
     //Meter bar
     meterContainer
@@ -302,7 +306,7 @@ class Graph extends Component {
   }
 
   generateThresholds(selection) {
-    const container = selection.selectAll('.meter-bar')
+    const container = selection.selectAll('.threshold__bar')
       .data(thresholds);
 
     container.exit()
@@ -311,7 +315,7 @@ class Graph extends Component {
     container.enter()
       .append('rect')
       .attrs({
-        'class': 'meter-bar',
+        'class': 'threshold__bar',
         'x': margin.left / 3,
         'y': (d) => yScale(d.value) + margin.top,
         'height': (d) => yScale(d.value),
@@ -338,11 +342,11 @@ class Graph extends Component {
     // Transform threshold container
     d3.select(this)
       .attr('transform', `translate(0, ${yPosition})`)
-      .select('.meter-text')
+      .select('.threshold__text')
         .text(`${yValue}%`);
 
     // Transform threshold meter
-    d3.select(`.x-meter rect[data-index="${currentIndex}"]`)
+    d3.select(`.meter rect[data-index="${currentIndex}"]`)
       .attrs({
         'y': margin.top + yPosition,
         height: height - yPosition,

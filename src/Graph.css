@@ -1,0 +1,31 @@
+.chart {
+  margin-top: 10px; }
+  .chart text {
+    font-family: Lato;
+    fill: #C1C1C1; }
+
+path.domain {
+  display: none; }
+  path.domain, path.domain g.tick line {
+    stroke: #F6F7FB; }
+
+.grid-lines .tick line {
+  stroke: #F6F7FB; }
+
+.threshold:hover {
+  cursor: -webkit-grab;
+  cursor: -moz-grab;
+  cursor: grab; }
+
+.threshold.active {
+  cursor: -webkit-grabbing;
+  cursor: -moz-grabbing;
+  cursor: grabbing; }
+
+.threshold__text {
+  font-size: 0.75em;
+  fill: #C1C1C1;
+  margin-left: 5px; }
+
+.threshold--hover.hidden {
+  display: none; }
